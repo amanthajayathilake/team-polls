@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "../models/database";
-import { Poll, PollResults, Vote } from "../types";
+import { Poll, Vote, PollResults } from "../types";
 
 export class PollService {
   async createPoll(
@@ -42,10 +42,11 @@ export class PollService {
     }
 
     const poll = result.rows[0];
+
     return {
       id: poll.id,
       question: poll.question,
-      options: JSON.parse(poll.options),
+      options: poll.options,
       createdAt: poll.created_at,
       expiresAt: poll.expires_at,
       isActive: poll.is_active,
@@ -62,7 +63,7 @@ export class PollService {
     try {
       await client.query("BEGIN");
 
-      // Check if poll exists and is active
+      // EXP: Check if poll exists and is active
       const pollResult = await client.query(
         "SELECT * FROM polls WHERE id = $1 AND is_active = true AND expires_at > NOW()",
         [pollId]
@@ -74,14 +75,14 @@ export class PollService {
       }
 
       const poll = pollResult.rows[0];
-      const options = JSON.parse(poll.options);
+      const options = poll.options;
 
       if (optionIndex < 0 || optionIndex >= options.length) {
         await client.query("ROLLBACK");
         return null;
       }
 
-      // Check for existing vote (idempotency)
+      // TODO: Check for existing vote
       const existingVote = await client.query(
         "SELECT * FROM votes WHERE poll_id = $1 AND user_id = $2",
         [pollId, userId]
@@ -92,7 +93,7 @@ export class PollService {
         return existingVote.rows[0];
       }
 
-      // Insert new vote
+      // EXP: Insert new vote
       const voteId = uuidv4();
       const voteResult = await client.query(
         "INSERT INTO votes (id, poll_id, user_id, option_index) VALUES ($1, $2, $3, $4) RETURNING *",
@@ -133,11 +134,11 @@ export class PollService {
 
     const result = await db.query(query, [pollId]);
 
-    // Initialize vote counts
+    // EXP: Initialize vote counts
     const votes = new Array(poll.options.length).fill(0);
     let totalVotes = 0;
 
-    // Fill in actual counts
+    // EXP: Fill in actual counts
     result.rows.forEach((row) => {
       votes[row.option_index] = parseInt(row.count);
       totalVotes += parseInt(row.count);

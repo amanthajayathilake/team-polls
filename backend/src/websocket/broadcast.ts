@@ -14,7 +14,7 @@ export async function broadcastVoteUpdate(
     },
   };
 
-  // Publish to Redis for other nodes
+  // EXP: Publish to Redis for other nodes
   await redis.publish("poll-updates", JSON.stringify(message));
 }
 

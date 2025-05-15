@@ -35,7 +35,7 @@ export const config: AppConfig = {
   wsPort: parseInt(process.env.WS_PORT || "3001", 10),
   database: {
     host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "5432", 10),
+    port: parseInt(process.env.DB_PORT || "5433", 10),
     user: process.env.DB_USER || "postgres",
     password: process.env.DB_PASSWORD || "postgres",
     database: process.env.DB_NAME || "team_polls",
@@ -50,7 +50,8 @@ export const config: AppConfig = {
     expiresIn: process.env.JWT_EXPIRES_IN || "1h",
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || "*",
+    // origin: process.env.CORS_ORIGIN || "*",
+    origin: "*",
   },
   rateLimit: {
     windowMs: 1000,

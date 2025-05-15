@@ -2,14 +2,16 @@ import jwt from "jsonwebtoken";
 import WebSocket from "ws";
 import { config } from "../config";
 import { redis } from "../models/redist";
+import logger from "../utils/logger";
 
 export const wss = new WebSocket.Server({ port: config.wsPort });
 
-// Map to track client subscriptions
+// EXP: Map to track client subscriptions
 const clientSubscriptions = new Map<WebSocket, Set<string>>();
 
 wss.on("connection", (ws: WebSocket, req) => {
   console.log("New WebSocket connection");
+  logger.info(`New WebSocket connection`);
 
   const subscriptions = new Set<string>();
   clientSubscriptions.set(ws, subscriptions);
@@ -21,7 +23,7 @@ wss.on("connection", (ws: WebSocket, req) => {
       if (data.type === "subscribe") {
         const { pollId, token } = data;
 
-        // Verify token (optional but recommended)
+        // EXP: Verify token (optional but recommended)
         try {
           jwt.verify(token, config.jwt.secret);
         } catch (error) {
@@ -41,6 +43,7 @@ wss.on("connection", (ws: WebSocket, req) => {
         ws.send(JSON.stringify({ type: "unsubscribed", pollId }));
       }
     } catch (error) {
+      logger.error(`WebSocket message error: ${error}`);
       console.error("WebSocket message error:", error);
       ws.send(
         JSON.stringify({ type: "error", message: "Invalid message format" })
@@ -49,7 +52,7 @@ wss.on("connection", (ws: WebSocket, req) => {
   });
 
   ws.on("close", async () => {
-    // Clean up subscriptions
+    // EXP: Clean up subscriptions
     for (const pollId of subscriptions) {
       await redis.sRem(`poll:${pollId}:subscribers`, ws.url || "anonymous");
     }
@@ -57,11 +60,12 @@ wss.on("connection", (ws: WebSocket, req) => {
   });
 
   ws.on("error", (error) => {
+    logger.error(`WebSocket  error: ${error}`);
     console.error("WebSocket error:", error);
   });
 });
 
-// Redis subscription for inter-process communication
+// EXP: Redis subscription for inter-process communication
 async function setupRedisSubscription() {
   const subscriber = redis.duplicate();
   await subscriber.connect();

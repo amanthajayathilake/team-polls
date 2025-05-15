@@ -12,7 +12,6 @@ export const db = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// Test connection
 db.connect((err, client, release) => {
   if (err) {
     console.error("Error acquiring client", err.stack);

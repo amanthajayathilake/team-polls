@@ -51,7 +51,12 @@ export const metricsMiddleware = (
 };
 
 // Endpoint to expose metrics
-export const metricsHandler = (req: Request, res: Response) => {
+export const metricsHandler = async (req: Request, res: Response) => {
   res.set("Content-Type", register.contentType);
-  res.end(register.metrics());
+  try {
+    const metrics = await register.metrics();
+    res.end(metrics);
+  } catch (error) {
+    res.status(500).end("Error collecting metrics");
+  }
 };

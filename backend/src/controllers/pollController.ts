@@ -66,7 +66,7 @@ export class PollController {
         return res.status(400).json({ error: "Invalid vote or poll closed" });
       }
 
-      // Get updated results and broadcast
+      // EXP: Get updated results and broadcast
       const results = await this.pollService.getPollResults(id);
       if (results) {
         broadcastVoteUpdate(id, results);

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Validation schemas
+// EXP: Validation schemas
 export const CreatePollSchema = z.object({
   question: z.string().min(1).max(500),
   options: z.array(z.string().min(1).max(200)).min(2).max(10),
@@ -11,7 +11,7 @@ export const VoteSchema = z.object({
   optionIndex: z.number().int().min(0),
 });
 
-// Types
+// EXP: Types
 export interface Poll {
   id: string;
   question: string;
