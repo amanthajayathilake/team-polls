@@ -2,7 +2,7 @@ import request from "supertest";
 import express from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../src/config";
-import { AuthController } from "../src/controllers/authCOntroller";
+import { AuthController } from "../src/controllers/authController";
 
 const app = express();
 app.use(express.json());
